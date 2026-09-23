@@ -1,0 +1,206 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  role         String   @default("admin")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model BusinessSettings {
+  id                 Int      @id @default(1)
+  gymName            String   @default("SHADOW FITNESS")
+  tagline            String   @default("DISCIPLINE OVER MOTIVATION.")
+  phone              String?
+  whatsappNumber     String?
+  email              String?
+  address            String?
+  googleMapsEmbedUrl String?
+  googleMapsLink     String?
+  openingHours       String   @default("[{\"days\":\"Monday - Friday\",\"hours\":\"05:30 AM - 10:30 PM\"},{\"days\":\"Saturday\",\"hours\":\"06:00 AM - 09:00 PM\"},{\"days\":\"Sunday\",\"hours\":\"07:00 AM - 01:00 PM\"}]")
+  parkingInfo        String?
+  accentColor        String   @default("#d4f933")
+  freeTrialEnabled   Boolean  @default(true)
+  instagramUrl       String?
+  youtubeUrl         String?
+  facebookUrl        String?
+  aboutText          String?
+  footerText         String?
+  updatedAt          DateTime @updatedAt
+}
+
+model HomepageSection {
+  id               Int      @id @default(1)
+  heroTitle        String   @default("BUILD YOUR\nSTRONGER SELF.")
+  heroSubtitle     String   @default("Train with purpose. Build strength. Become better every day.")
+  heroBadge        String   @default("TRAIN • BUILD • TRANSFORM")
+  heroCta1Text     String   @default("START YOUR JOURNEY")
+  heroCta1Link     String   @default("#membership")
+  heroCta2Text     String   @default("EXPLORE THE GYM")
+  heroCta2Link     String   @default("#programs")
+  manifestoTitle   String   @default("MORE THAN A GYM.")
+  manifestoText    String   @default("SHADOW FITNESS is a place to train with purpose, build discipline and become stronger—one session at a time.")
+  scrollTickerText String   @default("YOU DON'T NEED MORE MOTIVATION. | YOU NEED A ROUTINE. | SHOW UP. | DO THE WORK.")
+  heroMediaUrl     String?
+  updatedAt        DateTime @updatedAt
+}
+
+model Program {
+  id             String   @id @default(cuid())
+  slug           String   @unique
+  title          String
+  category       String   @default("Strength")
+  description    String
+  targetAudience String?
+  approach       String?
+  duration       String?
+  schedule       String?
+  ctaText        String   @default("ENQUIRE ABOUT THIS PROGRAM")
+  imageUrl       String?
+  isFeatured     Boolean  @default(false)
+  isPublished    Boolean  @default(true)
+  sortOrder      Int      @default(0)
+  trainerId      String?
+  trainer        Trainer? @relation(fields: [trainerId], references: [id])
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model Trainer {
+  id              String    @id @default(cuid())
+  slug            String    @unique
+  name            String
+  role            String
+  specializations String?
+  experience      String?
+  certifications  String?
+  bio             String?
+  photoUrl        String?
+  instagramUrl    String?
+  linkedinUrl     String?
+  isPublished     Boolean   @default(true)
+  sortOrder       Int       @default(0)
+  programs        Program[]
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+}
+
+model Membership {
+  id                       String   @id @default(cuid())
+  slug                     String   @unique
+  name                     String
+  price                    String
+  duration                 String
+  features                 String   @default("[]")
+  highlightBadge           String?
+  isPopular                Boolean  @default(false)
+  personalTrainingIncluded Boolean  @default(false)
+  isPublished              Boolean  @default(true)
+  sortOrder                Int      @default(0)
+  createdAt                DateTime @default(now())
+  updatedAt                DateTime @updatedAt
+}
+
+model Transformation {
+  id               String   @id @default(cuid())
+  name             String
+  beforeImage      String
+  afterImage       String
+  duration         String
+  goal             String
+  story            String
+  consentConfirmed Boolean  @default(false)
+  isPublished      Boolean  @default(true)
+  sortOrder        Int      @default(0)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+model GalleryImage {
+  id          String   @id @default(cuid())
+  title       String
+  category    String   @default("Gym")
+  imageUrl    String
+  caption     String?
+  sortOrder   Int      @default(0)
+  isPublished Boolean  @default(true)
+  createdAt   DateTime @default(now())
+}
+
+model Facility {
+  id          String   @id @default(cuid())
+  name        String
+  tag         String
+  description String
+  specs       String   @default("[]")
+  imageUrl    String?
+  sortOrder   Int      @default(0)
+  isPublished Boolean  @default(true)
+  createdAt   DateTime @default(now())
+}
+
+model Testimonial {
+  id          String   @id @default(cuid())
+  authorName  String
+  rating      Int      @default(5)
+  reviewText  String
+  reviewDate  String?
+  photoUrl    String?
+  source      String?
+  isPublished Boolean  @default(true)
+  createdAt   DateTime @default(now())
+}
+
+model Offer {
+  id              String    @id @default(cuid())
+  title           String
+  description     String
+  discountBadge   String?
+  originalPrice   String?
+  discountedPrice String?
+  startDate       DateTime?
+  endDate         DateTime?
+  ctaText         String?   @default("CLAIM OFFER")
+  isActive        Boolean   @default(true)
+  createdAt       DateTime  @default(now())
+}
+
+model Lead {
+  id             String   @id @default(cuid())
+  name           String
+  phone          String
+  email          String?
+  type           String   @default("general")
+  interestedPlan String?
+  fitnessGoal    String?
+  preferredTime  String?
+  message        String?
+  status         String   @default("new")
+  notes          String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model TrialRequest {
+  id            String   @id @default(cuid())
+  name          String
+  phone         String
+  preferredDate String?
+  preferredTime String?
+  fitnessGoal   String?
+  message       String?
+  status        String   @default("new")
+  notes         String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
