@@ -2,18 +2,32 @@ import { MetadataRoute } from 'next';
 import { prisma } from '@/lib/prisma';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://shadowfitness.vercel.app';
 
-  const [programs, trainers] = await Promise.all([
-    prisma.program.findMany({
-      where: { isPublished: true },
-      select: { slug: true, updatedAt: true },
-    }),
-    prisma.trainer.findMany({
-      where: { isPublished: true },
-      select: { slug: true, updatedAt: true },
-    }),
-  ]);
+  let programs: { slug: string; updatedAt: Date }[] = [];
+  let trainers: { slug: string; updatedAt: Date }[] = [];
+
+  try {
+    const results = await Promise.allSettled([
+      prisma.program.findMany({
+        where: { isPublished: true },
+        select: { slug: true, updatedAt: true },
+      }),
+      prisma.trainer.findMany({
+        where: { isPublished: true },
+        select: { slug: true, updatedAt: true },
+      }),
+    ]);
+
+    if (results[0].status === 'fulfilled') {
+      programs = results[0].value;
+    }
+    if (results[1].status === 'fulfilled') {
+      trainers = results[1].value;
+    }
+  } catch (err) {
+    console.warn('Sitemap dynamic data fetch skipped during static build:', err);
+  }
 
   const staticRoutes = [
     '',
@@ -22,7 +36,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     '/trainers',
     '/membership',
     '/gallery',
-    '/transformations',
     '/free-trial',
     '/contact',
   ].map((route) => ({
